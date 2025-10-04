@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pentad by AskLurk</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="{% if not user %}auth-body{% endif %}">
+    {% if not user %}
+    <!-- Authentication Screen -->
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="brand text-center mb-5">
+                <img src="{{ url_for('static', filename='Gemini_Generated_Image_8xh9yc8xh9yc8xh9.png') }}" alt="Pentad Logo" class="auth-logo">
+                <h1 class="display-4 fw-bold text-primary mb-3">Hi5</h1>
+                <p class="lead text-muted">Where logic, creativity, technicality, philosophy, and humor converge.</p>
+            </div>
+
+            <div class="oauth-box text-center">
+                <h4 class="mb-4">Get Started with Pentad</h4>
+                <div class="d-flex justify-content-center gap-4 mb-4 flex-wrap">
+                    <div class="oauth-provider">
+                        <a href="{{ url_for('google_login') }}" class="btn btn-outline-danger btn-lg oauth-btn">
+                            <img src="{{ url_for('static', filename='google-logo.png') }}" width="24" height="24" alt="Google">
+                            Sign in with Google
+                        </a>
+                    </div>
+                    
+                </div>
+                <p class="text-muted small">Secure authentication powered by OAuth 2.0</p>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Main Chat Application -->
+    <button id="floating-toggle-btn" class="creative-float-btn" title="Toggle Sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-card">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='Gemini_Generated_Image_8xh9yc8xh9yc8xh9.png') }}" alt="AI Chat Logo" class="logo">
+                <h1>Pentad</h1>
+                <p class="subtitle">Where logic, creativity, technicality, philosophy, and humor converge.</p>
+                <div class="user-welcome">
+                    <img src="{{ user.picture }}" alt="Profile" class="user-avatar-sm">
+                    <span>Welcome back, {{ user.name }}!</span>
+                    {% if session.payment_completed %}
+                        <span class="payment-status badge bg-success">
+                            <i class="fas fa-check"></i> Premium Active
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="input-group">
+                <textarea id="first-prompt" placeholder="Ask your first question..." autofocus></textarea>
+                <button id="start-btn" class="star-send-btn">
+                    Ask
+                    <div class="star-1"><svg viewBox="0 0 784.11 815.53"><path class="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"/></svg></div>
+                    <div class="star-2"><svg viewBox="0 0 784.11 815.53"><path class="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"/></svg></div>
+                    <div class="star-3"><svg viewBox="0 0 784.11 815.53"><path class="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"/></svg></div>
+                    <div class="star-4"><svg viewBox="0 0 784.11 815.53"><path class="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"/></svg></div>
+                    <div class="star-5"><svg viewBox="0 0 784.11 815.53"><path class="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"/></svg></div>
+                    <div class="star-6"><svg viewBox="0 0 784.11 815.53"><path class="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.37 371.12,197.68 392.05,407.74 20.93,-210.06 184.09,-378.37 392.05,-407.74 -207.98,-29.38 -371.16,-197.69 -392.06,-407.78z"/></svg></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-app" class="chat-app" style="display: none;">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-history"></i>&nbsp;&nbsp;&nbsp;History</h2>
+                <div class="search-box">
+                    <input type="text" id="history-search" placeholder="Search history..." />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="sidebar-actions">
+                    <button id="new-chat-btn" class="btn-new-chat icon" title="Start New Chat">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="fullscreen-btn" class="btn-fullscreen" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button id="theme-toggle-btn" class="btn-theme-toggle" title="Toggle Dark/Light Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+                <div class="sidebar-actions">
+                    <div class="token-counter" id="token-counter">0 / 300k</div>
+                </div>
+            </div>
+            <div id="history-list" class="history-list"></div>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <img src="{{ user.picture }}" alt="Profile Picture" class="profile-pic">
+                    <span class="user-name">{{ user.name }}</span>
+                    {% if session.payment_completed %}
+                        <span class="payment-badge"><i class="fas fa-crown"></i></span>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('logout') }}" class="logout-btn" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <div class="main-area" id="main-area">
+            <div class="chat-container" id="chat-container"></div>
+            <div id="file-chips" class="file-chips"></div>
+            <div class="input-bar">
+                <input type="file" id="file-input" multiple accept="image/*,.pdf,.txt,.doc,.docx" style="display:none;">
+                <button id="attach-btn" class="attach-btn" title="Add file or picture"><i class="fas fa-paperclip"></i></button>
+                <textarea id="prompt-input" placeholder="Type your next thought..." maxlength="1000"></textarea>
+                <button id="ask-btn" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        {% if user %}
+        // JavaScript code from your original template goes here
+        // (The same JavaScript you provided in your question)
+        /* ---------- DOM ---------- */
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatApp = document.getElementById('chat-app');
+        const firstPrompt = document.getElementById('first-prompt');
+        const startBtn = document.getElementById('start-btn');
+        const promptInput = document.getElementById('prompt-input');
+        const askBtn = document.getElementById('ask-btn');
+        const chatContainer = document.getElementById('chat-container');
+        const historyList = document.getElementById('history-list');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mainArea = document.getElementById('main-area');
+        const floatingToggleBtn = document.getElementById('floating-toggle-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const fileInput = document.getElementById('file-input');
+        const attachBtn = document.getElementById('attach-btn');
+        const fileChips = document.getElementById('file-chips');
+        let chatHistory = [];
+        let isSidebarOpen = true;
+        let asklurkUsedThisTurn = false;
+        let selectedFiles = [];
+
+        /* ---------- TOKEN COUNTER ---------- */
+        const tokenCounter = document.getElementById('token-counter');
+        let tokensUsed = 0;
+
+        function formatTokens(n) {
+            return n < 1000 ? n : (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+        }
+
+        function updateTokenCounter() {
+            tokenCounter.textContent = `${formatTokens(tokensUsed)} / 300k`;
+        }
+
+        /* ---------- SIDEBAR TOGGLE ---------- */
+        function toggleSidebar() {
+            isSidebarOpen = !isSidebarOpen;
+            if (isSidebarOpen) {
+                sidebar.classList.remove('sidebar-closed');
+                mainArea.style.marginLeft = '240px';
+                floatingToggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+            } else {
+                sidebar.classList.add('sidebar-closed');
+                mainArea.style.marginLeft = '0';
+                floatingToggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        }
+
+        floatingToggleBtn.addEventListener('click', toggleSidebar);
+
+        /* ---------- FULLSCREEN ---------- */
+        const fullscreenIcon = fullscreenBtn.querySelector('i');
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn('Fullscreen not allowed:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function updateFullscreenIcon() {
+            fullscreenIcon.className = document.fullscreenElement
+                ? 'fas fa-compress'
+                : 'fas fa-expand';
+        }
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+        document.addEventListener('fullscreenchange', updateFullscreenIcon);
+
+        /* ---------- THEME ---------- */
+        function loadTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            if (saved === 'light') {
+                document.body.classList.add('light-theme');
+                themeToggleBtn.querySelector('i').className = 'fas fa-sun';
+            }
+        }
+
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light-theme');
+            const icon = themeToggleBtn.querySelector('i');
+            if (isLight) {
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'light');
+            } else {
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        loadTheme();
+        themeToggleBtn.addEventListener('click', toggleTheme);
+
+        /* ---------- HISTORY ---------- */
+        function filterHistory() {
+            const q = document.getElementById('history-search').value.toLowerCase().trim();
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.style.display = item.title.toLowerCase().includes(q) ? 'flex' : 'none';
+            });
+        }
+
+        document.getElementById('history-search').addEventListener('input', filterHistory);
+
+        function addToHistory(prompt) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<i class="fas fa-message"></i><span>${escapeHtml(prompt.length > 40 ? prompt.substring(0, 40) + '…' : prompt)}</span>`;
+            item.title = prompt;
+            item.addEventListener('click', () => { 
+                promptInput.value = prompt; 
+                promptInput.focus(); 
+            });
+            historyList.prepend(item);
+        }
+
+        /* ---------- MESSAGES ---------- */
+        function appendUserMessage(text) {
+            const msg = document.createElement('div');
+            msg.className = 'message user-message';
+            msg.innerHTML = `<div class="avatar">👤</div><div class="bubble">${escapeHtml(text)}</div>`;
+            chatContainer.appendChild(msg);
+        }
+
+        function createResponseGroup() {
+            const group = document.createElement('div');
+            group.className = 'response-group';
+            group.innerHTML = `
+                <div class="ai-pair">
+                    <div class="ai-card logic-card">
+                        <div class="card-header"><div class="badge logic-badge">Logic AI</div></div>
+                        <div class="thinking-container logic-thinking"><div class="thinking-dots"><span></span><span></span><span></span></div><div class="thinking-text">Logic AI is analyzing…</div></div>
+                        <div class="response-display logic-response"></div>
+                    </div>
+                    <div class="ai-card creative-card">
+                        <div class="card-header"><div class="badge creative-badge">Creative AI</div></div>
+                        <div class="thinking-container creative-thinking"><div class="thinking-dots"><span></span><span></span><span></span></div><div class="thinking-text">Creative AI is imagining…</div></div>
+                        <div class="response-display creative-response"></div>
+                    </div>
+                    <div class="ai-card technical-card">
+                        <div class="card-header"><div class="badge technical-badge">Technical AI</div></div>
+                        <div class="thinking-container technical-thinking"><div class="thinking-dots"><span></span><span></span><span></span></div><div class="thinking-text">Technical AI is computing…</div></div>
+                        <div class="response-display technical-response"></div>
+                    </div>
+                    <div class="ai-card philosophical-card">
+                        <div class="card-header"><div class="badge philosophical-badge">Philosophical AI</div></div>
+                        <div class="thinking-container philosophical-thinking"><div class="thinking-dots"><span></span><span></span><span></span></div><div class="thinking-text">Philosophical AI is reflecting…</div></div>
+                        <div class="response-display philosophical-response"></div>
+                    </div>
+                    <div class="ai-card humorous-card">
+                        <div class="card-header"><div class="badge humorous-badge">Humorous AI</div></div>
+                        <div class="thinking-container humorous-thinking"><div class="thinking-dots"><span></span><span></span><span></span></div><div class="thinking-text">Humorous AI is joking…</div></div>
+                        <div class="response-display humorous-response"></div>
+                    </div>
+                </div>`;
+            return group;
+        }
+
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        /* ---------- ASKLURK ROW BUTTON ---------- */
+        function showAskLurkButton(responseGroup) {
+            if (asklurkUsedThisTurn) return;
+            asklurkUsedThisTurn = true;
+            const row = document.createElement('div');
+            row.className = 'asklurk-row';
+            row.innerHTML = `<button id="asklurk-merge-btn" title="AskLurk – merge all answers"><i class="fas fa-star"></i> AskLurk</button>`;
+            const pairRow = responseGroup.querySelector('.ai-pair');
+            pairRow.after(row);
+            const btn = row.querySelector('button');
+            btn.onclick = () => runAskLurkMerge(responseGroup, btn);
+        }
+
+        async function runAskLurkMerge(responseGroup, btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Merging…';
+            const answers = {
+                logic: responseGroup.querySelector('.logic-response').textContent || '',
+                creative: responseGroup.querySelector('.creative-response').textContent || '',
+                technical: responseGroup.querySelector('.technical-response').textContent || '',
+                philosophical: responseGroup.querySelector('.philosophical-response').textContent || '',
+                humorous: responseGroup.querySelector('.humorous-response').textContent || ''
+            };
+
+            try {
+                const res = await fetch('/asklurk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        answers, 
+                        prompt: promptInput.value || firstPrompt.value 
+                    })
+                });
+                
+                if (!res.ok) {
+                    if (res.status === 402) {
+                        throw new Error('Payment required. Please complete the payment process.');
+                    }
+                    throw new Error(`Network response was not ok: ${res.status} ${res.statusText}`);
+                }
+                const data = await res.json();
+                
+                if (data.best) {
+                    const bestCard = document.createElement('div');
+                    bestCard.className = 'ai-card asklurk-best';
+                    bestCard.innerHTML = `
+                        <div class="card-header"><div class="badge" style="background:#ffd700"><i class="fas fa-crown"></i> AskLurk Best Answer</div></div>
+                        <div class="response-display">${escapeHtml(data.best)}</div>`;
+                    const bestRow = document.createElement('div');
+                    bestRow.className = 'ai-pair best-answer-row';
+                    bestRow.appendChild(bestCard);
+                    btn.parentElement.after(bestRow);
+                    smoothScrollToBottom();
+                    
+                    // Update token count
+                    if (data.tokens_used) {
+                        tokensUsed = data.tokens_used;
+                        updateTokenCounter();
+                    }
+                }
+            } catch (err) {
+                console.error('AskLurk error', err);
+                if (err.message.includes('Payment required')) {
+                    alert('Payment required: Please complete the payment process to use AI features.');
+                    window.location.href = '/payment-options';
+                    return;
+                }
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-star"></i> AskLurk';
+                    btn.disabled = false;
+                    asklurkUsedThisTurn = false;
+                }, 2000);
+            }
+        }
+
+        /* ---------- FILE CHIPS ---------- */
+        function renderFileChips() {
+            fileChips.innerHTML = '';
+            selectedFiles.forEach((file, idx) => {
+                const chip = document.createElement('div');
+                chip.className = 'file-chip';
+                const isImage = file.type.startsWith('image/');
+                const isPDF = file.type === 'application/pdf';
+                chip.innerHTML = `
+                    ${isImage ? `<img src="${URL.createObjectURL(file)}" class="chip-img" alt=""/>` : 
+                      isPDF ? '<i class="fas fa-file-pdf"></i>' : '<i class="fas fa-file"></i>'}
+                    <span>${file.name}</span>
+                    <i class="fas fa-times chip-remove" data-idx="${idx}"></i>`;
+                fileChips.appendChild(chip);
+            });
+
+            fileChips.querySelectorAll('.chip-remove').forEach(icon => {
+                icon.onclick = (e) => {
+                    const idx = parseInt(e.currentTarget.dataset.idx);
+                    selectedFiles.splice(idx, 1);
+                    renderFileChips();
+                };
+            });
+        }
+
+        /* ---------- FILE UPLOAD ---------- */
+        attachBtn.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => {
+            const files = Array.from(e.target.files);
+            selectedFiles.push(...files);
+            renderFileChips();
+            fileInput.value = '';
+        };
+
+        async function uploadFiles() {
+            if (!selectedFiles.length) return [];
+            try {
+                const fd = new FormData();
+                selectedFiles.forEach(f => fd.append('files', f));
+                const res = await fetch('/upload', {
+                    method: 'POST',
+                    body: fd
+                });
+                if (!res.ok) throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
+                const data = await res.json();
+                return data.urls || [];
+            } catch (err) {
+                console.error('Upload error:', err);
+                return [];
+            }
+        }
+
+        /* ---------- STREAMING ---------- */
+        async function streamResponses(prompt, responseGroup) {
+            asklurkUsedThisTurn = false;
+            const displays = {
+                logic: responseGroup.querySelector('.logic-response'),
+                creative: responseGroup.querySelector('.creative-response'),
+                technical: responseGroup.querySelector('.technical-response'),
+                philosophical: responseGroup.querySelector('.philosophical-response'),
+                humorous: responseGroup.querySelector('.humorous-response')
+            };
+
+            responseGroup.querySelectorAll('.thinking-container').forEach(el => el.style.display = 'block');
+            let buffers = {
+                logic: '', creative: '', technical: '', philosophical: '', humorous: ''
+            };
+
+            try {
+                const fileUrls = await uploadFiles();
+                const payload = { prompt, fileUrls };
+                console.log('Fetching /chat with payload:', payload);
+                
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                console.log('Response status:', res.status, res.statusText);
+                if (!res.ok) {
+                    if (res.status === 402) {
+                        throw new Error('Payment required. Please complete the payment process.');
+                    }
+                    throw new Error(`Server responded ${res.status} ${res.statusText}`);
+                }
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buf = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buf += decoder.decode(value, { stream: true });
+                    const lines = buf.split('\n');
+                    buf = lines.pop();
+
+                    for (const ln of lines) {
+                        if (!ln.startsWith('data: ')) continue;
+                        try {
+                            const data = JSON.parse(ln.slice(6));
+                            const bot = data.bot;
+                            
+                            if (displays[bot]) {
+                                if (data.error) {
+                                    displays[bot].innerHTML = `<div class="error-banner">⚠️ ${data.error}</div>`;
+                                    responseGroup.querySelector(`.${bot}-thinking`).style.display = 'none';
+                                } else if (data.text) {
+                                    buffers[bot] += data.text;
+                                    displays[bot].textContent = buffers[bot];
+                                    responseGroup.querySelector(`.${bot}-thinking`).style.display = 'none';
+                                    smoothScrollToBottom();
+                                }
+                                
+                                if (data.tokens) { 
+                                    tokensUsed = data.tokens; 
+                                    updateTokenCounter(); 
+                                }
+                            }
+
+                            if (data.all_done) {
+                                tokensUsed = data.tokens || tokensUsed;
+                                updateTokenCounter();
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse SSE data:', ln, e);
+                        }
+                    }
+                }
+
+                responseGroup.querySelectorAll('.thinking-container').forEach(el => el.style.display = 'none');
+                if (!asklurkUsedThisTurn) showAskLurkButton(responseGroup);
+                selectedFiles = [];
+                renderFileChips();
+
+            } catch (err) {
+                console.error('Stream / upload error:', err);
+                if (err.message.includes('Payment required')) {
+                    responseGroup.querySelectorAll('.response-display').forEach(el => {
+                        el.innerHTML = `<div class="error-banner">⚠️ Payment required. Please complete the payment process to use AI features.</div>`;
+                    });
+                    // Redirect to payment options after a delay
+                    setTimeout(() => {
+                        window.location.href = '/payment-options';
+                    }, 3000);
+                } else {
+                    responseGroup.querySelectorAll('.response-display').forEach(el => {
+                        el.innerHTML = `<div class="error-banner">⚠️ Failed to connect. ${err.message}</div>`;
+                    });
+                }
+                responseGroup.querySelectorAll('.thinking-container').forEach(el => el.style.display = 'none');
+            }
+        }
+
+        /* ---------- HELPERS ---------- */
+        function smoothScrollToBottom() { 
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); 
+        }
+
+        function scrollToElement(el) { 
+            window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' }); 
+        }
+
+        /* ---------- CHAT FLOW ---------- */
+        async function startChat(prompt) {
+            if (!prompt?.trim() && !selectedFiles.length) return;
+            
+            welcomeScreen.style.opacity = '0';
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+                chatApp.style.display = 'flex';
+                setTimeout(() => chatApp.style.opacity = '1', 50);
+            }, 300);
+
+            addToHistory(prompt);
+            appendUserMessage(prompt + (selectedFiles.length ? ` (+${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''})` : ''));
+            
+            const group = createResponseGroup();
+            chatContainer.appendChild(group);
+            scrollToElement(group);
+            
+            firstPrompt.value = '';
+            promptInput.focus();
+            
+            await streamResponses(prompt, group);
+        }
+
+        async function handleAsk(prompt) {
+            if (!prompt?.trim() && !selectedFiles.length) return;
+            
+            addToHistory(prompt);
+            appendUserMessage(prompt + (selectedFiles.length ? ` (+${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''})` : ''));
+            
+            const group = createResponseGroup();
+            chatContainer.appendChild(group);
+            scrollToElement(group);
+            
+            promptInput.value = '';
+            await streamResponses(prompt, group);
+        }
+
+        function startNewChat() {
+            chatContainer.innerHTML = '';
+            selectedFiles = [];
+            renderFileChips();
+            window.scrollTo(0, 0);
+            promptInput.focus();
+            chatContainer.style.opacity = '0.5';
+            setTimeout(() => chatApp.style.opacity = '1', 300);
+            document.getElementById('history-search').value = '';
+            filterHistory();
+            asklurkUsedThisTurn = false;
+        }
+
+        /* ---------- BINDINGS ---------- */
+        startBtn.addEventListener('click', () => startChat(firstPrompt.value));
+        firstPrompt.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                startChat(firstPrompt.value);
+            }
+        });
+
+        askBtn.addEventListener('click', () => handleAsk(promptInput.value));
+        promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleAsk(promptInput.value);
+            }
+        });
+
+        newChatBtn.addEventListener('click', startNewChat);
+
+        /* ---------- INITIALIZATION ---------- */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize token counter
+            fetch('/tokens')
+                .then(res => res.json())
+                .then(data => {
+                    tokensUsed = data.tokens_used || 0;
+                    updateTokenCounter();
+                })
+                .catch(err => console.error('Failed to load token count:', err));
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
