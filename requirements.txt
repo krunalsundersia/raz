@@ -1,0 +1,6 @@
+Flask==2.3.3
+flask-cors==4.0.0
+authlib==1.2.1
+requests==2.31.0
+PyPDF2==3.0.1
+razorpay==1.4.2
